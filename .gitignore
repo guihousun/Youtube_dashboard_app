@@ -1,0 +1,16 @@
+.env
+tokens/
+youtube_tokens.json
+snapshots/
+output/
+release/
+YouTubeDashboard_Portable.zip
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+Thumbs.db
+Desktop.ini
+*.log
+vibe-coding_字幕_v3.mp4

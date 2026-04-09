@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube 公开数据多账号看板</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+    :root {
+      --bg:#070b12; --panel:rgba(19,25,38,.92); --line:rgba(255,255,255,.08); --text:#f4f1ea; --muted:rgba(244,241,234,.68);
+      --cyan:#57d9ef; --lime:#d4ff59; --amber:#ffbf66; --rose:#ff7b8f; --shadow:0 22px 60px rgba(0,0,0,.38);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;color:var(--text);font-family:"IBM Plex Sans",sans-serif;background:
+      radial-gradient(circle at 10% 0%, rgba(87,217,239,.12), transparent 28%),
+      radial-gradient(circle at 100% 12%, rgba(212,255,89,.10), transparent 24%),
+      linear-gradient(180deg,#05070c 0%,#090d15 42%,#05070c 100%)}
+    .shell{width:min(1440px,100%);margin:0 auto;padding:18px 14px 38px}
+    .hero{position:sticky;top:0;z-index:10;padding:2px 2px 18px;backdrop-filter:blur(16px);background:linear-gradient(180deg, rgba(6,8,13,.92), rgba(6,8,13,.72), rgba(6,8,13,.18), transparent)}
+    .hero-top,.toolbar,.hero-subline,.stats-strip,.accounts-actions,.profile-grid,.card-grid,.thumb-grid,.row-grid{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .hero-top{justify-content:space-between;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+    .chip,.action-button,.status-badge,input{font:inherit}
+    .chip,.action-button,.status-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text)}
+    .chip,.action-button{padding:10px 14px;font-size:12px}
+    .status-badge{padding:7px 11px;font-size:12px;font-weight:600}
+    .status-badge.ready{color:#7dffb4;background:rgba(125,255,180,.11);border-color:rgba(125,255,180,.18)}
+    .status-badge.error{color:#ff9eaa;background:rgba(255,158,170,.11);border-color:rgba(255,158,170,.18)}
+    button.action-button{cursor:pointer}
+    h1{margin:10px 0 0;font-family:"Bebas Neue",sans-serif;font-size:clamp(48px,12vw,132px);line-height:.92;font-weight:400;letter-spacing:.03em}
+    .hero-copy{max-width:860px;margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+    .hero-subline,.stats-strip{margin-top:14px}
+    .grid-2{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:12px}
+    .grid-3{display:grid;grid-template-columns:.88fr .84fr 1.08fr;gap:16px;margin-top:16px}
+    .grid-2-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .panel{border:1px solid var(--line);border-radius:30px;padding:20px;background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)),
+      linear-gradient(135deg, rgba(87,217,239,.05), transparent 38%, transparent 62%, rgba(212,255,89,.06)),
+      var(--panel);box-shadow:var(--shadow)}
+    .panel-title{margin:0;color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+    .headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .headline strong{font-family:"Bebas Neue",sans-serif;font-size:74px;line-height:.88;font-weight:400}
+    .headline-copy{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+    .rows,.metrics,.list,.accounts-list{display:grid;gap:12px;margin-top:18px}
+    .scroll-list{max-height:320px;overflow:auto;padding-right:6px}
+    .scroll-list::-webkit-scrollbar{width:8px}
+    .scroll-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
+    .rank-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13px}
+    .bar-track{height:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}
+    .bar-track>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime))}
+    .metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    .metric-card,.account-item,.thumb-card,.empty-box,.profile-card{border:1px solid rgba(255,255,255,.06);border-radius:22px;background:rgba(255,255,255,.03)}
+    .metric-card,.profile-card{padding:14px}
+    .metric-card label,.profile-meta span,.profile-kpis span{display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+    .metric-card strong{font-family:"Bebas Neue",sans-serif;font-size:34px;line-height:.92;font-weight:400}
+    .bullet{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:13px;line-height:1.45}
+    .bullet strong{color:var(--text);text-align:right}
+    .thumb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    .thumb-card{position:relative;min-height:152px;overflow:hidden;color:inherit;text-decoration:none}
+    .thumb-card img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,rgba(6,8,13,.88) 100%)}
+    .thumb-rank,.thumb-title,.thumb-hint,.thumb-metric{position:absolute;z-index:1}
+    .thumb-rank{top:10px;left:10px;width:30px;height:30px;border-radius:50%;background:rgba(6,8,13,.82);display:inline-flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:20px}
+    .thumb-title{
+      left:12px;
+      right:12px;
+      bottom:14px;
+      font-size:12px;
+      line-height:1.4;
+      font-weight:600;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      text-shadow:0 2px 12px rgba(0,0,0,.45)
+    }
+    .thumb-hint{right:12px;top:12px;font-size:11px;padding:5px 8px;border-radius:999px;background:rgba(6,8,13,.74);color:rgba(255,255,255,.84)}
+    .thumb-metric{
+      left:12px;
+      bottom:68px;
+      font-size:11px;
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(6,8,13,.82);
+      color:rgba(255,255,255,.95);
+      text-shadow:0 2px 12px rgba(0,0,0,.45)
+    }
+    .accounts-input{flex:1 1 240px;min-width:220px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--text);outline:none}
+    .account-item{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:14px 16px}
+    .account-meta{display:grid;gap:4px;min-width:0}
+    .account-meta strong{font-size:16px}
+    .account-meta span,.profile-meta strong{color:var(--muted);font-size:12px;line-height:1.5;word-break:break-all}
+    .empty-box{padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.65}
+    .error-banner{display:none;margin-top:16px;padding:14px 16px;border-radius:22px;border:1px solid rgba(255,158,170,.2);background:rgba(255,123,143,.08);color:#ffd6de;font-size:13px;line-height:1.65}
+    .error-banner.visible{display:block}
+    .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+    .profile-card{display:grid;gap:12px}
+    .profile-head{display:flex;gap:12px;align-items:center}
+    .avatar{width:54px;height:54px;border-radius:18px;object-fit:cover;background:rgba(255,255,255,.06)}
+    .profile-meta h3{margin:0;font-size:16px}
+    .profile-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .profile-kpis strong{display:block;font-family:"Bebas Neue",sans-serif;font-size:28px;line-height:.9}
+    @media (max-width: 1100px){.grid-2,.grid-3,.grid-2-equal{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}}
+    @media (max-width: 520px){.metric-grid,.thumb-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-top">
+        <span id="status-text">公开数据 / 15 分钟缓存</span>
+        <div class="toolbar">
+          <span class="chip" id="last-updated">上次刷新：--</span>
+          <button class="action-button" id="refresh-button" type="button">刷新</button>
+        </div>
+      </div>
+      <h1 id="hero-title" style="display:none">0 Accounts</h1>
+      <p class="hero-copy" id="hero-copy">当前为纯公开数据模式，不登录账号，只读取公开频道与公开视频信息。</p>
+      <div class="hero-subline" id="hero-subline"></div>
+      <div class="stats-strip" id="stats-strip" style="display:none"></div>
+      <div class="error-banner" id="error-banner"></div>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <p class="panel-title">01 / 频道总播放量较昨日快照增量排行</p>
+        <div class="headline"><strong id="total-views">0</strong><span class="status-badge ready" id="views-delta">+0</span></div>
+        <p class="headline-copy" id="hero-card-copy">基于本地每日快照计算公开频道总播放量增量。没有昨日基准的频道不参与排行，并标记为新接入。</p>
+        <div class="rows scroll-list" id="playback-list"></div>
+      </article>
+      <article class="panel">
+        <p class="panel-title">02 / 频道当前订阅数排行</p>
+        <div class="headline"><strong id="subscriber-total">0</strong><span class="status-badge ready">公开字段</span></div>
+        <div class="list scroll-list" id="subscriber-list"></div>
+      </article>
+    </section>
+
+    <section class="grid-3">
+      <article class="panel">
+        <p class="panel-title">03 / 昨日发布视频当前总播放排行</p>
+        <div class="metric-grid">
+          <div class="metric-card"><label>视频数量</label><strong id="published-count">0</strong></div>
+          <div class="metric-card"><label>最高播放</label><strong id="published-max">0</strong></div>
+          <div class="metric-card"><label>平均播放</label><strong id="published-avg">0</strong></div>
+          <div class="metric-card"><label>累计评论</label><strong id="published-comments">0</strong></div>
+        </div>
+        <div class="list scroll-list" id="published-list"></div>
+      </article>
+      <article class="panel">
+        <p class="panel-title">04 / 今日发布视频汇总</p>
+        <div class="metrics" id="today-summary"></div>
+      </article>
+      <article class="panel">
+        <p class="panel-title">05 / 昨日发布视频封面墙</p>
+        <div class="thumb-grid scroll-list" id="gallery"></div>
+      </article>
+    </section>
+
+    <section class="grid-2-equal" style="display:none">
+      <article class="panel">
+        <p class="panel-title">06 / 频道当前视频总数排行</p>
+        <div class="headline"><strong id="video-total">0</strong><span class="status-badge ready">公开字段</span></div>
+        <div class="list scroll-list" id="video-count-list"></div>
+      </article>
+      <article class="panel">
+        <p class="panel-title">07 / 近 28 天发布视频总播放榜</p>
+        <div class="list scroll-list" id="latest-list"></div>
+      </article>
+    </section>
+
+    <section class="grid-2-equal" style="display:none">
+      <article class="panel">
+        <p class="panel-title">08 / 近 28 天发布视频点赞榜</p>
+        <div class="list scroll-list" id="liked-list"></div>
+      </article>
+      <article class="panel">
+        <p class="panel-title">09 / 近 28 天发布视频评论榜</p>
+        <div class="list scroll-list" id="commented-list"></div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <p class="panel-title">10 / 频道公开画像总览</p>
+      <div class="profile-grid scroll-list" id="profile-grid"></div>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <p class="panel-title">11 / 频道管理</p>
+      <p class="headline-copy">只需输入公开账号名，例如 <code>@GolemAnton</code>。可选填写别名，例如“员工1”，看板会优先显示别名。</p>
+      <div class="toolbar" style="margin-top:16px">
+        <input id="account-handle-input" class="accounts-input" type="text" placeholder="输入公开账号名，例如 @GolemAnton" />
+        <input id="account-alias-input" class="accounts-input" type="text" placeholder="输入别名，例如 员工1（可选）" />
+        <button class="action-button" id="add-account-button" type="button">添加账号</button>
+      </div>
+      <div class="accounts-list scroll-list" id="accounts-list"></div>
+    </section>
+  </main>
+
+  <script>
+    const compact = (value) => {
+      if (value === null || value === undefined) return "N/A";
+      const number = Number(value);
+      if (!Number.isFinite(number)) return String(value);
+      if (Math.abs(number) >= 1000000) return `${(number / 1000000).toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1")}M`;
+      if (Math.abs(number) >= 1000) return `${(number / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+      return `${Math.round(number)}`;
+    };
+    const formatDate = (value) => value ? new Date(value).toLocaleDateString("zh-CN") : "N/A";
+    const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
+    const setHtml = (id, html) => { const node = document.getElementById(id); if (node) node.innerHTML = html; };
+    const apiOrigin = () => window.location.protocol.startsWith("http") ? window.location.origin : "http://127.0.0.1:8130";
+    const dashboardUrl = (force = false) => `${apiOrigin()}/api/dashboard${force ? "?force=1" : ""}`;
+    const accountsUrl = () => `${apiOrigin()}/api/accounts`;
+
+    const parseJsonResponse = async (response) => {
+      const text = await response.text();
+      if (!text.trim()) return {};
+      try { return JSON.parse(text); }
+      catch { throw new Error("本地服务返回了非 JSON 响应，请重启服务并强刷浏览器。"); }
+    };
+
+    const showBanner = (message, isError = true) => {
+      const node = document.getElementById("error-banner");
+      node.textContent = message;
+      node.classList.toggle("visible", Boolean(message));
+      node.style.borderColor = isError ? "rgba(255, 158, 170, 0.2)" : "rgba(125, 255, 180, 0.2)";
+      node.style.background = isError ? "rgba(255, 123, 143, 0.08)" : "rgba(125, 255, 180, 0.08)";
+      node.style.color = isError ? "#ffd6de" : "#d8ffeb";
+    };
+
+    const renderPlaybackRows = (rows) => {
+      if (!rows.length) return setHtml("playback-list", `<div class="empty-box">当前没有足够的公开频道快照数据可用于排行。至少运行两天后，差值会更准确。</div>`);
+      const maxValue = Math.max(...rows.map((item) => Number(item.value || 0)), 1);
+      setHtml("playback-list", rows.map((item) => `
+        <div class="rank-row">
+          <span>${String(item.rank).padStart(2, "0")}</span>
+          <div class="bar-track"><i style="width:${Math.round((Number(item.value || 0) / maxValue) * 100)}%"></i></div>
+          <strong>${item.label}</strong>
+          <strong>+${compact(item.value)}</strong>
+        </div>
+      `).join(""));
+    };
+
+    const renderSimpleList = (id, rows, formatter, emptyText = "当前没有可展示的数据。") => {
+      if (!rows.length) return setHtml(id, `<div class="empty-box">${emptyText}</div>`);
+      setHtml(id, rows.map(formatter).join(""));
+    };
+
+    const renderPublished = (published) => {
+      const rows = published.rows || [];
+      const maxViews = rows.length ? Math.max(...rows.map((item) => Number(item.currentViewCount || 0))) : 0;
+      const avgViews = rows.length ? rows.reduce((sum, item) => sum + Number(item.currentViewCount || 0), 0) / rows.length : 0;
+      const totalComments = rows.reduce((sum, item) => sum + Number(item.commentCount || 0), 0);
+      setText("published-count", compact(rows.length));
+      setText("published-max", compact(maxViews));
+      setText("published-avg", compact(avgViews));
+      setText("published-comments", compact(totalComments));
+      renderSimpleList("published-list", rows, (item, index) => `<div class="bullet"><span>${index + 1}. ${item.accountLabel} / ${item.title}</span><strong>${compact(item.currentViewCount)}</strong></div>`, "昨天没有发布视频。");
+    };
+
+    const renderTodaySummary = (todayCard) => {
+      const rows = todayCard.rows || [];
+      const totalViews = rows.reduce((sum, item) => sum + Number(item.currentViewCount || 0), 0);
+      const totalLikes = rows.reduce((sum, item) => sum + Number(item.likeCount || 0), 0);
+      const totalComments = rows.reduce((sum, item) => sum + Number(item.commentCount || 0), 0);
+      setHtml("today-summary", [
+        `<div class="metric-card"><label>今日发布视频数</label><strong>${compact(rows.length)}</strong></div>`,
+        `<div class="metric-card"><label>今日视频总播放</label><strong>${compact(totalViews)}</strong></div>`,
+        `<div class="metric-card"><label>今日视频总点赞</label><strong>${compact(totalLikes)}</strong></div>`,
+        `<div class="metric-card"><label>今日视频总评论</label><strong>${compact(totalComments)}</strong></div>`
+      ].join(""));
+    };
+
+    const renderGallery = (rows) => {
+      if (!rows.length) return setHtml("gallery", `<div class="empty-box" style="grid-column:1 / -1">昨天没有发布视频，所以这里暂时没有封面墙。</div>`);
+      setHtml("gallery", rows.map((item) => `
+        <a class="thumb-card" href="${item.videoUrl || "#"}" target="_blank" rel="noopener noreferrer">
+          ${item.thumbnail ? `<img src="${item.thumbnail}" alt="${item.title}">` : ""}
+          <span class="thumb-rank">${item.rank}</span>
+          <span class="thumb-hint">打开 YouTube</span>
+          <span class="thumb-metric">播放 ${compact(item.currentViewCount)}</span>
+          <b class="thumb-title">${item.accountLabel ? `${item.accountLabel} / ` : ""}${item.title}</b>
+        </a>
+      `).join(""));
+    };
+
+    const renderAccounts = (accounts) => {
+      if (!accounts.length) return setHtml("accounts-list", `<div class="empty-box">当前还没有配置任何公开频道。请先输入 @handle 添加账号。</div>`);
+      setHtml("accounts-list", accounts.map((account) => `
+        <div class="account-item">
+          <div class="account-meta">
+            <strong>${account.label}</strong>
+            <span>${account.id} / ${account.handle}</span>
+            ${account.hasBaseline === false ? `<span>新接入 / 无昨日基准</span>` : ``}
+          </div>
+          <div class="accounts-actions">
+            <button class="action-button" type="button" data-remove-account="${account.id}">删除</button>
+          </div>
+        </div>
+      `).join(""));
+
+      document.querySelectorAll("[data-remove-account]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const accountId = button.getAttribute("data-remove-account");
+          const response = await fetch(`${apiOrigin()}/api/accounts/${encodeURIComponent(accountId)}`, { method: "DELETE" });
+          const payload = await parseJsonResponse(response);
+          if (!response.ok) return showBanner(payload.error || "删除账号失败");
+          await refreshAll(true);
+          showBanner(`已删除账号 ${accountId}。`, false);
+        });
+      });
+    };
+
+    const renderProfiles = (rows) => {
+      if (!rows.length) return setHtml("profile-grid", `<div class="empty-box">当前还没有可展示的频道画像。</div>`);
+      setHtml("profile-grid", rows.map((item) => `
+        <article class="profile-card">
+          <div class="profile-head">
+            ${item.thumbnail ? `<img class="avatar" src="${item.thumbnail}" alt="${item.label}">` : `<div class="avatar"></div>`}
+            <div class="profile-meta">
+              <h3>${item.label}</h3>
+              <strong>${item.channelTitle}</strong>
+              <span>${item.handle}</span>
+            </div>
+          </div>
+          <div class="profile-kpis">
+            <div><span>总播放</span><strong>${compact(item.totalViews)}</strong></div>
+            <div><span>订阅数</span><strong>${compact(item.subscriberCount)}</strong></div>
+            <div><span>视频数</span><strong>${compact(item.videoCount)}</strong></div>
+            <div><span>昨日播放差值</span><strong>${compact(item.viewsDeltaYesterday)}</strong></div>
+          </div>
+          <div class="bullet"><span>频道创建时间</span><strong>${formatDate(item.publishedAt)}</strong></div>
+          <div class="bullet"><span>频道地区</span><strong>${item.country || "N/A"}</strong></div>
+          ${item.viewsDeltaYesterday === 0 && item.hasBaseline === false ? `<div class="bullet"><span>状态</span><strong>新接入 / 无昨日基准</strong></div>` : ``}
+        </article>
+      `).join(""));
+    };
+
+    const renderHero = (payload) => {
+      const accountCount = payload.summary?.configuredAccountCount || 0;
+      const totals = payload.summary?.totals || { views: 0, subscribers: 0, videos: 0 };
+      setText("hero-copy", `当前为纯公开数据模式。已配置 ${accountCount} 个频道，总播放 ${compact(totals.views)}，总订阅 ${compact(totals.subscribers)}，总视频数 ${compact(totals.videos)}。`);
+      setText("status-text", `公开数据 / ${Math.round((payload.cache?.ttlSeconds || 900) / 60)} 分钟缓存`);
+      setText("last-updated", `上次刷新：${new Date(payload.generatedAt).toLocaleString("zh-CN", { hour12: false })}`);
+      setHtml("hero-subline", `<span class="status-badge ready">已接入 ${accountCount} 个公开频道</span>`);
+    };
+
+    const applyDashboard = (payload) => {
+      renderHero(payload);
+      renderAccounts(payload.accounts || []);
+      setText("total-views", compact(payload.cards.playbackDelta.headlineTotalViews));
+      setText("views-delta", `+${compact(payload.cards.playbackDelta.headlineDeltaViews)}`);
+      renderPlaybackRows(payload.cards.playbackDelta.rows || []);
+      setText("subscriber-total", compact(payload.cards.subscriberBoard.headlineTotalSubscribers));
+      renderSimpleList("subscriber-list", payload.cards.subscriberBoard.rows || [], (item) => `<div class="bullet"><span>${item.rank}. ${item.label}</span><strong>${compact(item.value)}</strong></div>`, "当前没有订阅数据。");
+      renderPublished(payload.cards.publishedYesterday || { rows: [] });
+      renderTodaySummary(payload.cards.todayPublished || { rows: [] });
+      renderGallery(payload.cards.topVideosYesterday.rows || []);
+      setText("video-total", compact(payload.cards.videoCountBoard.headlineTotalVideos));
+      renderSimpleList("video-count-list", payload.cards.videoCountBoard.rows || [], (item) => `<div class="bullet"><span>${item.rank}. ${item.label}</span><strong>${compact(item.value)}</strong></div>`, "当前没有视频数数据。");
+      renderSimpleList("latest-list", payload.cards.latestVideos.rows || [], (item, index) => `<div class="bullet"><span>${index + 1}. ${item.accountLabel} / ${item.title}</span><strong>${compact(item.currentViewCount)}</strong></div>`, "当前没有最新视频数据。");
+      renderSimpleList("liked-list", payload.cards.likedVideos.rows || [], (item, index) => `<div class="bullet"><span>${index + 1}. ${item.accountLabel} / ${item.title}</span><strong>${compact(item.likeCount)}</strong></div>`, "当前没有点赞数据。");
+      renderSimpleList("commented-list", payload.cards.commentedVideos.rows || [], (item, index) => `<div class="bullet"><span>${index + 1}. ${item.accountLabel} / ${item.title}</span><strong>${compact(item.commentCount)}</strong></div>`, "当前没有评论数据。");
+      renderProfiles(payload.cards.channelProfiles.rows || []);
+    };
+
+    const parseAndThrow = async (response) => {
+      const payload = await parseJsonResponse(response);
+      if (!response.ok) throw new Error(payload.error || "请求失败");
+      return payload;
+    };
+
+    const refreshAll = async (force = false) => {
+      const refreshButton = document.getElementById("refresh-button");
+      const originalText = refreshButton.textContent;
+      refreshButton.disabled = true;
+      refreshButton.textContent = "刷新中...";
+      try {
+        const accounts = await parseAndThrow(await fetch(accountsUrl(), { cache: "no-store" }));
+        renderAccounts(accounts.accounts || []);
+        const dashboard = await parseAndThrow(await fetch(dashboardUrl(force), { cache: "no-store" }));
+        applyDashboard(dashboard);
+        showBanner("", false);
+      } catch (error) {
+        showBanner(error.message || String(error), true);
+      } finally {
+        refreshButton.disabled = false;
+        refreshButton.textContent = originalText;
+      }
+    };
+
+    document.getElementById("add-account-button").addEventListener("click", async () => {
+      const handle = document.getElementById("account-handle-input").value.trim();
+      const alias = document.getElementById("account-alias-input").value.trim();
+      if (!handle) return showBanner("请先输入公开账号名，例如 @GolemAnton。", true);
+      try {
+        const response = await fetch(accountsUrl(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ handle, alias, label: alias || handle }),
+        });
+        await parseAndThrow(response);
+        document.getElementById("account-handle-input").value = "";
+        document.getElementById("account-alias-input").value = "";
+        await refreshAll(true);
+        showBanner(`已添加公开频道 ${alias || handle}。`, false);
+      } catch (error) {
+        showBanner(error.message || String(error), true);
+      }
+    });
+
+    document.getElementById("refresh-button").addEventListener("click", async () => {
+      await refreshAll(true);
+      showBanner("已强制刷新公开数据看板。", false);
+    });
+
+    refreshAll(false);
+    setInterval(() => refreshAll(false), 60 * 1000);
+  </script>
+</body>
+</html>
