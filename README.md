@@ -2,6 +2,10 @@
 
 纯公开数据版 YouTube 多频道看板。
 
+## Dashboard Preview
+
+![Dashboard Preview](docs/images/dashboard-preview.png)
+
 ## 特点
 
 - 不登录 YouTube 账号
