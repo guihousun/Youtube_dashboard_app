@@ -14,48 +14,52 @@
     body{margin:0;min-height:100vh;color:var(--text);font-family:"IBM Plex Sans",sans-serif;background:
       radial-gradient(circle at 10% 0%, rgba(87,217,239,.12), transparent 28%),
       radial-gradient(circle at 100% 12%, rgba(212,255,89,.10), transparent 24%),
-      linear-gradient(180deg,#05070c 0%,#090d15 42%,#05070c 100%)}
-    .shell{width:min(1440px,100%);margin:0 auto;padding:18px 14px 38px}
-    .hero{position:sticky;top:0;z-index:10;padding:2px 2px 18px;backdrop-filter:blur(16px);background:linear-gradient(180deg, rgba(6,8,13,.92), rgba(6,8,13,.72), rgba(6,8,13,.18), transparent)}
+      linear-gradient(180deg,#05070c 0%,#090d15 42%,#05070c 100%);overflow:auto}
+    .shell{width:100%;max-width:none;min-height:100vh;margin:0;padding:12px 14px 14px;display:grid;grid-template-rows:auto auto;gap:12px}
+    .hero{position:relative;z-index:10;padding:0}
     .hero-top,.toolbar,.hero-subline,.stats-strip,.accounts-actions,.profile-grid,.card-grid,.thumb-grid,.row-grid{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .hero-top{justify-content:space-between;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
     .chip,.action-button,.status-badge,input{font:inherit}
     .chip,.action-button,.status-badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text)}
-    .chip,.action-button{padding:10px 14px;font-size:12px}
+    .chip,.action-button{padding:8px 12px;font-size:12px}
     .status-badge{padding:7px 11px;font-size:12px;font-weight:600}
     .status-badge.ready{color:#7dffb4;background:rgba(125,255,180,.11);border-color:rgba(125,255,180,.18)}
     .status-badge.error{color:#ff9eaa;background:rgba(255,158,170,.11);border-color:rgba(255,158,170,.18)}
     button.action-button{cursor:pointer}
     h1{margin:10px 0 0;font-family:"Bebas Neue",sans-serif;font-size:clamp(48px,12vw,132px);line-height:.92;font-weight:400;letter-spacing:.03em}
-    .hero-copy{max-width:860px;margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
-    .hero-subline,.stats-strip{margin-top:14px}
-    .grid-2{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:12px}
-    .grid-3{display:grid;grid-template-columns:.88fr .84fr 1.08fr;gap:16px;margin-top:16px}
-    .grid-2-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .hero-copy{max-width:980px;margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    .hero-subline,.stats-strip{margin-top:10px}
+    .dashboard-layout{display:grid;grid-template-rows:auto auto;gap:12px}
+    .first-screen{display:grid;grid-template-rows:252px minmax(520px, calc(100vh - 301px));gap:12px;min-height:calc(100vh - 98px)}
+    .second-screen{display:grid;grid-template-rows:auto;gap:12px;padding-top:4px}
+    .summary-band{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .main-band{display:grid;grid-template-columns:.88fr .88fr 1.52fr;gap:12px}
+    .bottom-band{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
     .panel{border:1px solid var(--line);border-radius:30px;padding:20px;background:
       linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)),
       linear-gradient(135deg, rgba(87,217,239,.05), transparent 38%, transparent 62%, rgba(212,255,89,.06)),
-      var(--panel);box-shadow:var(--shadow)}
-    .panel-title{margin:0;color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-    .headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:18px}
-    .headline strong{font-family:"Bebas Neue",sans-serif;font-size:74px;line-height:.88;font-weight:400}
-    .headline-copy{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
-    .rows,.metrics,.list,.accounts-list{display:grid;gap:12px;margin-top:18px}
+      var(--panel);box-shadow:var(--shadow);overflow:hidden}
+    .panel-title{margin:0;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+    .headline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .headline strong{font-family:"Bebas Neue",sans-serif;font-size:58px;line-height:.86;font-weight:400}
+    #total-views{font-size:50px}
+    .headline-copy{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .rows,.metrics,.list,.accounts-list{display:grid;gap:10px;margin-top:14px}
     .scroll-list{max-height:320px;overflow:auto;padding-right:6px}
     .scroll-list::-webkit-scrollbar{width:8px}
     .scroll-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
-    .rank-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13px}
+    .rank-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:12px}
     .bar-track{height:7px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}
     .bar-track>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime))}
-    .metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    .metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
     .metric-card,.account-item,.thumb-card,.empty-box,.profile-card{border:1px solid rgba(255,255,255,.06);border-radius:22px;background:rgba(255,255,255,.03)}
-    .metric-card,.profile-card{padding:14px}
+    .metric-card,.profile-card{padding:12px}
     .metric-card label,.profile-meta span,.profile-kpis span{display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
-    .metric-card strong{font-family:"Bebas Neue",sans-serif;font-size:34px;line-height:.92;font-weight:400}
-    .bullet{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:13px;line-height:1.45}
+    .metric-card strong{font-family:"Bebas Neue",sans-serif;font-size:31px;line-height:.9;font-weight:400}
+    .bullet{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;line-height:1.4}
     .bullet strong{color:var(--text);text-align:right}
-    .thumb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
-    .thumb-card{position:relative;min-height:152px;overflow:hidden;color:inherit;text-decoration:none}
+    .thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:14px;align-content:start}
+    .thumb-card{position:relative;min-height:138px;overflow:hidden;color:inherit;text-decoration:none}
     .thumb-card img{width:100%;height:100%;object-fit:cover;display:block}
     .thumb-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 20%,rgba(6,8,13,.88) 100%)}
     .thumb-rank,.thumb-title,.thumb-hint,.thumb-metric{position:absolute;z-index:1}
@@ -63,9 +67,9 @@
     .thumb-title{
       left:12px;
       right:12px;
-      bottom:14px;
+      bottom:12px;
       font-size:12px;
-      line-height:1.4;
+      line-height:1.35;
       font-weight:600;
       display:-webkit-box;
       -webkit-line-clamp:3;
@@ -76,7 +80,7 @@
     .thumb-hint{right:12px;top:12px;font-size:11px;padding:5px 8px;border-radius:999px;background:rgba(6,8,13,.74);color:rgba(255,255,255,.84)}
     .thumb-metric{
       left:12px;
-      bottom:68px;
+      bottom:60px;
       font-size:11px;
       padding:5px 8px;
       border-radius:999px;
@@ -84,22 +88,35 @@
       color:rgba(255,255,255,.95);
       text-shadow:0 2px 12px rgba(0,0,0,.45)
     }
-    .accounts-input{flex:1 1 240px;min-width:220px;padding:14px 16px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--text);outline:none}
-    .account-item{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:14px 16px}
+    .accounts-input{flex:1 1 220px;min-width:180px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--text);outline:none}
+    .account-item{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:12px 14px}
     .account-meta{display:grid;gap:4px;min-width:0}
     .account-meta strong{font-size:16px}
     .account-meta span,.profile-meta strong{color:var(--muted);font-size:12px;line-height:1.5;word-break:break-all}
-    .empty-box{padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.65}
+    .empty-box{padding:12px 14px;color:var(--muted);font-size:12px;line-height:1.55}
     .error-banner{display:none;margin-top:16px;padding:14px 16px;border-radius:22px;border:1px solid rgba(255,158,170,.2);background:rgba(255,123,143,.08);color:#ffd6de;font-size:13px;line-height:1.65}
     .error-banner.visible{display:block}
-    .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+    .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
     .profile-card{display:grid;gap:12px}
     .profile-head{display:flex;gap:12px;align-items:center}
     .avatar{width:54px;height:54px;border-radius:18px;object-fit:cover;background:rgba(255,255,255,.06)}
     .profile-meta h3{margin:0;font-size:16px}
-    .profile-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .profile-kpis strong{display:block;font-family:"Bebas Neue",sans-serif;font-size:28px;line-height:.9}
-    @media (max-width: 1100px){.grid-2,.grid-3,.grid-2-equal{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}}
+    .profile-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .profile-kpis strong{display:block;font-family:"Bebas Neue",sans-serif;font-size:24px;line-height:.9}
+    .summary-panel,.published-panel,.today-panel,.gallery-panel,.profile-panel,.manager-panel{display:flex;flex-direction:column}
+    .published-panel .list,.profile-panel .profile-grid,.manager-panel .accounts-list{flex:1;overflow:auto;padding-right:6px}
+    .published-panel .list::-webkit-scrollbar,.profile-panel .profile-grid::-webkit-scrollbar,.manager-panel .accounts-list::-webkit-scrollbar{width:8px}
+    .published-panel .list::-webkit-scrollbar-thumb,.profile-panel .profile-grid::-webkit-scrollbar-thumb,.manager-panel .accounts-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
+    .gallery-panel{display:flex;flex-direction:column;min-height:0}
+    .summary-panel .scroll-list{max-height:92px}
+    #subscriber-list{max-height:180px}
+    .published-panel .list{max-height:calc(100% - 220px)}
+    .today-panel .metrics{max-height:100%;overflow:auto;padding-right:4px}
+    .gallery-panel .thumb-grid{flex:1;max-height:none;overflow:auto;padding-right:6px}
+    .gallery-panel .thumb-grid::-webkit-scrollbar{width:8px}
+    .gallery-panel .thumb-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:999px}
+    .profile-panel,.manager-panel{min-height:520px}
+    @media (max-width: 1100px){.first-screen{grid-template-rows:auto auto;min-height:unset}.summary-band,.main-band,.bottom-band{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.gallery-panel{min-height:unset}.gallery-panel .thumb-grid{max-height:none}.profile-panel,.manager-panel{min-height:unset}}
     @media (max-width: 520px){.metric-grid,.thumb-grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -115,44 +132,41 @@
       </div>
       <h1 id="hero-title" style="display:none">0 Accounts</h1>
       <p class="hero-copy" id="hero-copy">当前为纯公开数据模式，不登录账号，只读取公开频道与公开视频信息。</p>
-      <div class="hero-subline" id="hero-subline"></div>
+      <div class="hero-subline" id="hero-subline" style="display:none"></div>
       <div class="stats-strip" id="stats-strip" style="display:none"></div>
       <div class="error-banner" id="error-banner"></div>
     </section>
 
-    <section class="grid-2">
-      <article class="panel">
+    <div class="dashboard-layout">
+    <section class="first-screen">
+    <section class="summary-band">
+      <article class="panel summary-panel">
         <p class="panel-title">01 / 频道总播放量较昨日快照增量排行</p>
         <div class="headline"><strong id="total-views">0</strong><span class="status-badge ready" id="views-delta">+0</span></div>
         <p class="headline-copy" id="hero-card-copy">基于本地每日快照计算公开频道总播放量增量。没有昨日基准的频道不参与排行，并标记为新接入。</p>
         <div class="rows scroll-list" id="playback-list"></div>
       </article>
-      <article class="panel">
+      <article class="panel summary-panel">
         <p class="panel-title">02 / 频道当前订阅数排行</p>
-        <div class="headline"><strong id="subscriber-total">0</strong><span class="status-badge ready">公开字段</span></div>
         <div class="list scroll-list" id="subscriber-list"></div>
       </article>
     </section>
 
-    <section class="grid-3">
-      <article class="panel">
+    <section class="main-band">
+      <article class="panel published-panel">
         <p class="panel-title">03 / 昨日发布视频当前总播放排行</p>
-        <div class="metric-grid">
-          <div class="metric-card"><label>视频数量</label><strong id="published-count">0</strong></div>
-          <div class="metric-card"><label>最高播放</label><strong id="published-max">0</strong></div>
-          <div class="metric-card"><label>平均播放</label><strong id="published-avg">0</strong></div>
-          <div class="metric-card"><label>累计评论</label><strong id="published-comments">0</strong></div>
-        </div>
+        <div class="metric-grid" id="published-summary"></div>
         <div class="list scroll-list" id="published-list"></div>
       </article>
-      <article class="panel">
+      <article class="panel today-panel">
         <p class="panel-title">04 / 今日发布视频汇总</p>
         <div class="metrics" id="today-summary"></div>
       </article>
-      <article class="panel">
+      <article class="panel gallery-panel">
         <p class="panel-title">05 / 昨日发布视频封面墙</p>
-        <div class="thumb-grid scroll-list" id="gallery"></div>
+        <div class="thumb-grid" id="gallery"></div>
       </article>
+    </section>
     </section>
 
     <section class="grid-2-equal" style="display:none">
@@ -178,21 +192,26 @@
       </article>
     </section>
 
-    <section class="panel" style="margin-top:16px">
-      <p class="panel-title">10 / 频道公开画像总览</p>
-      <div class="profile-grid scroll-list" id="profile-grid"></div>
+    <section class="second-screen">
+    <section class="bottom-band">
+    <section class="panel profile-panel">
+      <p class="panel-title">频道公开画像总览</p>
+      <div class="profile-grid" id="profile-grid"></div>
     </section>
 
-    <section class="panel" style="margin-top:16px">
-      <p class="panel-title">11 / 频道管理</p>
+    <section class="panel manager-panel">
+      <p class="panel-title">频道管理</p>
       <p class="headline-copy">只需输入公开账号名，例如 <code>@GolemAnton</code>。可选填写别名，例如“员工1”，看板会优先显示别名。</p>
       <div class="toolbar" style="margin-top:16px">
         <input id="account-handle-input" class="accounts-input" type="text" placeholder="输入公开账号名，例如 @GolemAnton" />
         <input id="account-alias-input" class="accounts-input" type="text" placeholder="输入别名，例如 员工1（可选）" />
         <button class="action-button" id="add-account-button" type="button">添加账号</button>
       </div>
-      <div class="accounts-list scroll-list" id="accounts-list"></div>
+      <div class="accounts-list" id="accounts-list"></div>
     </section>
+    </section>
+    </section>
+    </div>
   </main>
 
   <script>
@@ -245,15 +264,56 @@
       setHtml(id, rows.map(formatter).join(""));
     };
 
+    const renderSubscriberRows = (rows) => {
+      if (!rows.length) {
+        setHtml("subscriber-list", `<div class="empty-box">当前没有订阅数据。</div>`);
+        return;
+      }
+      setHtml("subscriber-list", `
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          ${rows.map((item) => `
+            <div class="metric-card" style="padding:10px 12px;border-radius:18px">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;line-height:1.35">
+                <span style="color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.rank}. ${item.label}</span>
+                <strong style="font-size:22px;line-height:.9;flex:0 0 auto">${compact(item.value)}</strong>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `);
+    };
+
     const renderPublished = (published) => {
       const rows = published.rows || [];
       const maxViews = rows.length ? Math.max(...rows.map((item) => Number(item.currentViewCount || 0))) : 0;
       const avgViews = rows.length ? rows.reduce((sum, item) => sum + Number(item.currentViewCount || 0), 0) / rows.length : 0;
       const totalComments = rows.reduce((sum, item) => sum + Number(item.commentCount || 0), 0);
-      setText("published-count", compact(rows.length));
-      setText("published-max", compact(maxViews));
-      setText("published-avg", compact(avgViews));
-      setText("published-comments", compact(totalComments));
+      setHtml("published-summary", `
+        <div class="metric-card" style="padding:10px 12px;border-radius:18px">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;line-height:1.35">
+            <span style="color:var(--muted)">视频数量</span>
+            <strong style="font-size:22px;line-height:.9">${compact(rows.length)}</strong>
+          </div>
+        </div>
+        <div class="metric-card" style="padding:10px 12px;border-radius:18px">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;line-height:1.35">
+            <span style="color:var(--muted)">最高播放</span>
+            <strong style="font-size:22px;line-height:.9">${compact(maxViews)}</strong>
+          </div>
+        </div>
+        <div class="metric-card" style="padding:10px 12px;border-radius:18px">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;line-height:1.35">
+            <span style="color:var(--muted)">平均播放</span>
+            <strong style="font-size:22px;line-height:.9">${compact(avgViews)}</strong>
+          </div>
+        </div>
+        <div class="metric-card" style="padding:10px 12px;border-radius:18px">
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;line-height:1.35">
+            <span style="color:var(--muted)">累计评论</span>
+            <strong style="font-size:22px;line-height:.9">${compact(totalComments)}</strong>
+          </div>
+        </div>
+      `);
       renderSimpleList("published-list", rows, (item, index) => `<div class="bullet"><span>${index + 1}. ${item.accountLabel} / ${item.title}</span><strong>${compact(item.currentViewCount)}</strong></div>`, "昨天没有发布视频。");
     };
 
@@ -338,10 +398,9 @@
     const renderHero = (payload) => {
       const accountCount = payload.summary?.configuredAccountCount || 0;
       const totals = payload.summary?.totals || { views: 0, subscribers: 0, videos: 0 };
-      setText("hero-copy", `当前为纯公开数据模式。已配置 ${accountCount} 个频道，总播放 ${compact(totals.views)}，总订阅 ${compact(totals.subscribers)}，总视频数 ${compact(totals.videos)}。`);
+      setText("hero-copy", `已配置 ${accountCount} 个频道，总播放 ${compact(totals.views)}，总订阅 ${compact(totals.subscribers)}，总视频数 ${compact(totals.videos)}。`);
       setText("status-text", `公开数据 / ${Math.round((payload.cache?.ttlSeconds || 900) / 60)} 分钟缓存`);
       setText("last-updated", `上次刷新：${new Date(payload.generatedAt).toLocaleString("zh-CN", { hour12: false })}`);
-      setHtml("hero-subline", `<span class="status-badge ready">已接入 ${accountCount} 个公开频道</span>`);
     };
 
     const applyDashboard = (payload) => {
@@ -351,7 +410,7 @@
       setText("views-delta", `+${compact(payload.cards.playbackDelta.headlineDeltaViews)}`);
       renderPlaybackRows(payload.cards.playbackDelta.rows || []);
       setText("subscriber-total", compact(payload.cards.subscriberBoard.headlineTotalSubscribers));
-      renderSimpleList("subscriber-list", payload.cards.subscriberBoard.rows || [], (item) => `<div class="bullet"><span>${item.rank}. ${item.label}</span><strong>${compact(item.value)}</strong></div>`, "当前没有订阅数据。");
+      renderSubscriberRows(payload.cards.subscriberBoard.rows || []);
       renderPublished(payload.cards.publishedYesterday || { rows: [] });
       renderTodaySummary(payload.cards.todayPublished || { rows: [] });
       renderGallery(payload.cards.topVideosYesterday.rows || []);
