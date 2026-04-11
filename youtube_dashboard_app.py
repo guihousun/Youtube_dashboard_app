@@ -746,7 +746,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a local YouTube public dashboard.")
     parser.add_argument("--host", default="127.0.0.1", help="Server host, default: 127.0.0.1")
     parser.add_argument("--port", type=int, default=8130, help="Server port, default: 8130")
-    parser.add_argument("--api-key", default=os.getenv("YT_API_KEY", ""), help="YouTube Data API key.")
+    parser.add_argument("--api-key", default=None, help="YouTube Data API key.")
     parser.add_argument("--cache-ttl", type=int, default=CACHE_TTL_SECONDS, help="Server-side cache TTL in seconds.")
     parser.add_argument("--extended-video-boards", action="store_true", help="Enable extra 28-day video boards (07/08/09).")
     return parser.parse_args()
@@ -756,9 +756,9 @@ def main() -> int:
     args = parse_args()
     base_dir = Path(__file__).resolve().parent
     env_values = resolve_env_values(base_dir)
-    api_key = args.api_key or env_values.get("YT_API_KEY", "")
+    api_key = args.api_key or env_values.get("YT_API_KEY") or os.getenv("YT_API_KEY")
     account_specs = load_accounts_config(base_dir)
-    service = YouTubeDashboardService(base_dir=base_dir, api_key=api_key or None, account_specs=account_specs)
+    service = YouTubeDashboardService(base_dir=base_dir, api_key=api_key, account_specs=account_specs)
     service.cache_ttl_seconds = args.cache_ttl
     service.enable_extended_video_boards = bool(args.extended_video_boards)
     server = ThreadingHTTPServer((args.host, args.port), build_handler(base_dir, service))
