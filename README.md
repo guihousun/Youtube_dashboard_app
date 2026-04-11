@@ -6,6 +6,8 @@
 
 ![Dashboard Preview](docs/images/dashboard-preview.png)
 
+![Dashboard Preview 2](docs/images/dashboard-preview2.png)
+
 ## 特点
 
 - 不登录 YouTube 账号
