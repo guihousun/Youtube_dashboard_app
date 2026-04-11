@@ -226,6 +226,20 @@
     const dashboardUrl = (force = false) => `${apiOrigin()}/api/dashboard${force ? "?force=1" : ""}`;
     const accountsUrl = () => `${apiOrigin()}/api/accounts`;
 
+    let isOperationInProgress = false;
+    const withOperationLock = async (fn) => {
+      if (isOperationInProgress) {
+        showBanner("操作正在进行中，请稍候...", true);
+        return;
+      }
+      isOperationInProgress = true;
+      try {
+        await fn();
+      } finally {
+        isOperationInProgress = false;
+      }
+    };
+
     const parseJsonResponse = async (response) => {
       const text = await response.text();
       if (!text.trim()) return {};
@@ -336,19 +350,33 @@
             ${account.hasBaseline === false ? `<span>新接入 / 无昨日基准</span>` : ``}
           </div>
           <div class="accounts-actions">
-            <button class="action-button" type="button" data-remove-account="${account.id}">删除</button>
+            <button class="action-button" type="button" data-remove-account="${account.id}" data-account-label="${account.label}">删除</button>
           </div>
         </div>
       `).join(""));
 
       document.querySelectorAll("[data-remove-account]").forEach((button) => {
         button.addEventListener("click", async () => {
-          const accountId = button.getAttribute("data-remove-account");
-          const response = await fetch(`${apiOrigin()}/api/accounts/${encodeURIComponent(accountId)}`, { method: "DELETE" });
-          const payload = await parseJsonResponse(response);
-          if (!response.ok) return showBanner(payload.error || "删除账号失败");
-          await refreshAll(true);
-          showBanner(`已删除账号 ${accountId}。`, false);
+          await withOperationLock(async () => {
+            const accountId = button.getAttribute("data-remove-account");
+            const accountLabel = button.getAttribute("data-account-label");
+            if (!confirm(`确定要删除账号 "${accountLabel}" 吗？此操作不可撤销。`)) return;
+            button.disabled = true;
+            button.textContent = "删除中...";
+            try {
+              const response = await fetch(`${apiOrigin()}/api/accounts/${encodeURIComponent(accountId)}`, { method: "DELETE" });
+              const payload = await parseJsonResponse(response);
+              if (!response.ok) throw new Error(payload.error || "删除账号失败");
+              const dashboard = await parseAndThrow(await fetch(dashboardUrl(true), { cache: "no-store" }));
+              applyDashboard(dashboard);
+              showBanner(`已删除账号 ${accountLabel}。`, false);
+            } catch (error) {
+              showBanner(error.message || String(error), true);
+            } finally {
+              button.disabled = false;
+              button.textContent = "删除";
+            }
+          });
         });
       });
     };
@@ -416,8 +444,6 @@
       refreshButton.disabled = true;
       refreshButton.textContent = "刷新中...";
       try {
-        const accounts = await parseAndThrow(await fetch(accountsUrl(), { cache: "no-store" }));
-        renderAccounts(accounts.accounts || []);
         const dashboard = await parseAndThrow(await fetch(dashboardUrl(force), { cache: "no-store" }));
         applyDashboard(dashboard);
         showBanner("", false);
@@ -430,23 +456,36 @@
     };
 
     document.getElementById("add-account-button").addEventListener("click", async () => {
-      const handle = document.getElementById("account-handle-input").value.trim();
-      const alias = document.getElementById("account-alias-input").value.trim();
-      if (!handle) return showBanner("请先输入公开账号名，例如 @GolemAnton。", true);
-      try {
-        const response = await fetch(accountsUrl(), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ handle, alias, label: alias || handle }),
-        });
-        await parseAndThrow(response);
-        document.getElementById("account-handle-input").value = "";
-        document.getElementById("account-alias-input").value = "";
-        await refreshAll(true);
-        showBanner(`已添加公开频道 ${alias || handle}。`, false);
-      } catch (error) {
-        showBanner(error.message || String(error), true);
-      }
+      await withOperationLock(async () => {
+        const handleInput = document.getElementById("account-handle-input");
+        const aliasInput = document.getElementById("account-alias-input");
+        const addButton = document.getElementById("add-account-button");
+        const handle = handleInput.value.trim();
+        const alias = aliasInput.value.trim();
+        if (!handle) return showBanner("请先输入公开账号名，例如 @GolemAnton。", true);
+        if (!handle.startsWith("@") && !handle.includes("youtube.com/")) {
+          return showBanner("账号名格式不正确。请输入 @handle 格式，例如 @GolemAnton。", true);
+        }
+        addButton.disabled = true;
+        addButton.textContent = "添加中...";
+        try {
+          const response = await fetch(accountsUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ handle, alias, label: alias || handle }),
+          });
+          await parseAndThrow(response);
+          handleInput.value = "";
+          aliasInput.value = "";
+          await refreshAll(true);
+          showBanner(`已添加公开频道 ${alias || handle}。`, false);
+        } catch (error) {
+          showBanner(error.message || String(error), true);
+        } finally {
+          addButton.disabled = false;
+          addButton.textContent = "添加账号";
+        }
+      });
     });
 
     document.getElementById("refresh-button").addEventListener("click", async () => {

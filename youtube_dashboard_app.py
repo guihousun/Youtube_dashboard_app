@@ -11,7 +11,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, unquote
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -123,11 +123,16 @@ def save_accounts_config(base_dir: Path, accounts: list[dict[str, str]]) -> None
 
 
 def add_account_spec(base_dir: Path, label: str = "", handle: str = "", alias: str = "") -> dict[str, str]:
-    normalized_handle = normalize_handle(handle)
-    display_name = alias.strip() or label.strip() or normalized_handle
-    if not normalized_handle:
+    if not handle or not handle.strip():
         raise DashboardError("Public account handle is required.")
+    normalized_handle = normalize_handle(handle)
+    if not normalized_handle:
+        raise DashboardError("Invalid account handle format. Please use @handle format.")
     accounts = load_accounts_config(base_dir)
+    existing_handles = {item["handle"].lower() for item in accounts}
+    if normalized_handle.lower() in existing_handles:
+        raise DashboardError(f"Account {normalized_handle} already exists.")
+    display_name = alias.strip() or label.strip() or normalized_handle
     base_id = sanitize_account_id(alias.strip() or normalized_handle)
     account_id = base_id
     suffix = 2
@@ -148,6 +153,8 @@ def add_account_spec(base_dir: Path, label: str = "", handle: str = "", alias: s
 
 
 def remove_account_spec(base_dir: Path, account_id: str) -> bool:
+    if not account_id or not account_id.strip():
+        raise DashboardError("Account ID is required.")
     accounts = load_accounts_config(base_dir)
     filtered = [item for item in accounts if item["id"] != account_id]
     if len(filtered) == len(accounts):
@@ -637,9 +644,19 @@ class YouTubeDashboardService:
 
 
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
+    _last_account_operation: float = 0
+    _min_operation_interval: float = 2.0
+
     def __init__(self, *args: Any, directory: str, service: YouTubeDashboardService, **kwargs: Any) -> None:
         self.service = service
         super().__init__(*args, directory=directory, **kwargs)
+
+    def check_rate_limit(self) -> bool:
+        now = time.time()
+        if now - self._last_account_operation < self._min_operation_interval:
+            return False
+        self._last_account_operation = now
+        return True
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
@@ -663,7 +680,8 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
     def do_DELETE(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         if parsed.path.startswith("/api/accounts/"):
-            self.handle_accounts_delete(parsed.path.split("/")[-1])
+            account_id = unquote(parsed.path.split("/")[-1])
+            self.handle_accounts_delete(account_id)
             return
         self.send_error(404)
 
@@ -696,6 +714,14 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def handle_accounts_create(self) -> None:
+        if not self.check_rate_limit():
+            body = json.dumps({"error": "操作过于频繁，请稍后再试。"}, ensure_ascii=False).encode("utf-8")
+            self.send_response(429)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         try:
             payload = self.read_json_body()
             handle = str(payload.get("handle", "")).strip()
@@ -715,6 +741,14 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def handle_accounts_delete(self, account_id: str) -> None:
+        if not self.check_rate_limit():
+            body = json.dumps({"error": "操作过于频繁，请稍后再试。"}, ensure_ascii=False).encode("utf-8")
+            self.send_response(429)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         try:
             removed = remove_account_spec(self.service.base_dir, account_id)
             if not removed:
